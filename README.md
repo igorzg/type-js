@@ -1,4 +1,4 @@
-Type-js
+Type-js [![Build Status](https://travis-ci.org/igorzg/type-js.svg?branch=master)](https://travis-ci.org/igorzg/type-js)
 ========
 
 Static type support for javascript

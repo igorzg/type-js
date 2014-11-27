@@ -44,7 +44,7 @@ User = AdminUser.inherit({
         this.setGroup('user'); // this will set group to user
     },
     setPassword: function(value) {
-        // this is not allowed all values must be defined in _construct
+        // this is not allowed all members must be defined at initialization proces (in _construct)
         this.password = value;
     }
 });

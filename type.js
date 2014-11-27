@@ -1,38 +1,38 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD
-        define('Class', factory);
+        define('Type', factory);
     } else if (typeof exports === 'object' && typeof module === 'object') {
         // Node
         module.exports = factory();
     } else {
         // Browser globals
-        root.Class = factory();
+        root.Type = factory();
     }
 }(this, function () {
     "use strict";
     var initializing = false;
+
     /**
      * @license Mit Licence 2014
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @name Class
+     * @name Type
      *
      * @constructor
      * @description
-     * Define class constructor
+     * Define Type constructor
      */
-    function Class() {}
-
+    function Type() {}
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method Class#create
+     * @method Type#create
      *
      * @description
-     * Create an class
+     * Create an Type
      */
-    Class.create = function Class_create(prop) {
+    Type.create = function (prop) {
         var _super = this.prototype, prototype;
 
         initializing = true;
@@ -40,8 +40,8 @@
         initializing = false;
 
         Object.keys(prop).forEach(function it(key) {
-            if (isFunction(prop[key]) && isFunction(_super[key]) && /\b_super\b/.test(prop[key])) {
-                defineProperty(prototype, key, (function (name, fn) {
+            if (Type.isFunction(prop[key]) && Type.isFunction(_super[key]) && /\b_super\b/.test(prop[key])) {
+                prototype[key] = (function (name, fn) {
                     return function () {
                         var tmp = this._super, ret;
                         this._super = _super[name];
@@ -49,50 +49,62 @@
                         this._super = tmp;
                         return ret;
                     };
-                })(key, prop[key]), "function");
+                })(key, prop[key]);
             } else {
-                defineProperty(prototype, key, prop[key], getType(prop[key]));
+                prototype[key] = prop[key];
             }
         });
 
         function Class() {
-            if (!initializing && this._construct) {
-                this._construct.apply(this, arguments);
+            if (!initializing) {
+
+                if (Type.isFunction(this._construct)) {
+                    this._construct.apply(this, arguments);
+                }
                 Object.keys(this).forEach(function it(key) {
-                    defineProperty(this, key, this[key], getType(this[key]));
+                    Type.defineProperty(this, key, this[key], Type.getType(this[key]));
                 }.bind(this));
                 try {
-                    Object.preventExtensions(Class.prototype);
+                    Object.freeze(Class.prototype);
                     Object.preventExtensions(this);
                 } catch (e) {
                     console.log('ES5 is not supported by your browser', e);
                 }
+
             }
         }
+
         Class.prototype = prototype;
-        Class.prototype.constructor = Class;
-        Class.inherit = Class_create;
+        Class.prototype.constructor = Type;
+        Class.inherit = Type.create;
+
+        try {
+            Object.freeze(Class);
+        } catch (e) {
+            console.log('ES5 is not supported by your browser', e);
+        }
+
         return Class;
     };
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method Class#defineProperty
+     * @method Type#defineProperty
      *
      * @description
      * Define property
      */
-    function defineProperty(obj, key, value, type) {
+    Type.defineProperty = function (obj, key, value, type) {
         var iVal = value, nType = type;
         Object.defineProperty(obj, key, {
             set: function (nVal) {
 
                 // if initial value is undefined or null
-                if (!nType && Class.isInitialized(nVal)) {
-                    nType = Class.getType(nVal);
+                if (!nType && Type.isInitialized(nVal)) {
+                    nType = Type.getType(nVal);
                     // assert type
-                } else if (Class.isInitialized(nVal) && !Class.assert(nType, nVal)) {
-                    throw new TypeError('"' + getType(nVal) + '" value: (' + nVal + '), is expected to be: "' + nType + '" type.');
+                } else if (Type.isInitialized(nVal) && !Type.assert(nType, nVal)) {
+                    throw new TypeError('"' + Type.getType(nVal) + '" value: (' + nVal + '), is expected to be: "' + nType + '" type.');
                 }
                 iVal = nVal;
             },
@@ -100,19 +112,28 @@
                 return iVal;
             }
         });
-    }
+    };
 
-    Class.defineProperty = defineProperty;
+    Type.OBJECT = "object";
+    Type.STIRNG = "string";
+    Type.ARRAY = "array";
+    Type.REGEX = "regexp";
+    Type.NUMBER = "number";
+    Type.BOOLEAN = "boolean";
+    Type.UNDEFINED = "undefined";
+    Type.NULL = "null";
+    Type.FUNCTION = "function";
+    Type.DATE = "date";
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method Class#assert
+     * @method Type#assert
      *
      * @description
      * Assert type
      */
-    Class.assert = function (type, value) {
-        return type === Class.getType(value);
+    Type.assert = function (type, value) {
+        return type === Type.getType(value);
     };
     /**
      * @since 0.0.1
@@ -122,8 +143,8 @@
      * @description
      * Check if vaule is initial
      */
-    Class.isInitialized = function (value) {
-        return !Class.isUndefined(value) && !Class.isNull(value);
+    Type.isInitialized = function (value) {
+        return !Type.isUndefined(value) && !Type.isNull(value);
     };
     /**
      * @since 0.0.1
@@ -133,32 +154,30 @@
      * @description
      * Get correct type of value
      */
-    function getType(value) {
-        if (Class.isBoolean(value)) {
-            return 'boolean';
-        } else if (Class.isUndefined(value)) {
-            return 'undefined';
-        } else if (Class.isString(value)) {
-            return 'string';
-        } else if (Class.isNumber(value)) {
-            return 'number';
-        } else if (Class.isArray(value)) {
-            return 'array';
-        } else if (Class.isNull(value)) {
-            return 'null';
-        } else if (Class.isFunction(value)) {
-            return 'function';
-        } else if (Class.isDate(value)) {
-            return 'date';
-        } else if (Class.isRegExp(value)) {
-            return 'regexp';
-        } else if (Class.isObject(value)) {
-            return 'object';
+    Type.getType = function (value) {
+        if (Type.isBoolean(value)) {
+            return Type.BOOLEAN;
+        } else if (Type.isUndefined(value)) {
+            return Type.UNDEFINED;
+        } else if (Type.isString(value)) {
+            return Type.STIRNG;
+        } else if (Type.isNumber(value)) {
+            return Type.NUMBER;
+        } else if (Type.isArray(value)) {
+            return Type.ARRAY;
+        } else if (Type.isNull(value)) {
+            return Type.NULL;
+        } else if (Type.isFunction(value)) {
+            return Type.FUNCTION;
+        } else if (Type.isDate(value)) {
+            return Type.DATE;
+        } else if (Type.isRegExp(value)) {
+            return Type.REGEX;
+        } else if (Type.isObject(value)) {
+            return Type.OBJECT;
         }
         throw new TypeError(value);
-    }
-
-    Class.getType = getType;
+    };
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -167,10 +186,9 @@
      * @description
      * Check if value is boolean
      */
-    Class.isBoolean = function (value) {
+    Type.isBoolean = function (value) {
         return typeof value === 'boolean';
     };
-
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -179,11 +197,9 @@
      * @description
      * Check if value is un-defined
      */
-    Class.isUndefined = function (value) {
+    Type.isUndefined = function (value) {
         return typeof value === 'undefined';
     };
-
-
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -192,10 +208,9 @@
      * @description
      * Check if value is string
      */
-    Class.isString = function (value) {
+    Type.isString = function (value) {
         return typeof value === 'string';
     };
-
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -204,10 +219,9 @@
      * @description
      * Check if value is isNumber
      */
-    Class.isNumber = function (value) {
+    Type.isNumber = function (value) {
         return typeof value === 'number';
     };
-
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -216,10 +230,9 @@
      * @description
      * Check if value is array
      */
-    Class.isArray = function (value) {
+    Type.isArray = function (value) {
         return Array.isArray(value);
     };
-
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -228,7 +241,7 @@
      * @description
      * Check if value is funciton
      */
-    Class.isNull = function (value) {
+    Type.isNull = function (value) {
         return value === null;
     };
     /**
@@ -239,12 +252,9 @@
      * @description
      * Check if value is funciton
      */
-    function isFunction(value) {
+    Type.isFunction = function (value) {
         return typeof value === 'function';
-    }
-
-    Class.isFunction = isFunction;
-
+    };
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -253,11 +263,9 @@
      * @description
      * Check if value is array
      */
-    Class.isDate = function (value) {
+    Type.isDate = function (value) {
         return Object.prototype.toString.call(value) === '[object Date]';
     };
-
-
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -266,10 +274,9 @@
      * @description
      * Check if object is an regular expression
      */
-    Class.isRegExp = function (value) {
+    Type.isRegExp = function (value) {
         return Object.prototype.toString.call(value) === '[object RegExp]';
     };
-
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -278,10 +285,15 @@
      * @description
      * Check if value is object
      */
-    Class.isObject = function (value) {
-        return !Class.isNull(value) && typeof value === 'object';
+    Type.isObject = function (value) {
+        return !Type.isNull(value) && typeof value === 'object';
     };
 
+    try {
+        Object.freeze(Type);
+    } catch (e) {
+        console.log('ES5 is not supported by your browser', e);
+    }
 
-    return Class;
+    return Type;
 }));

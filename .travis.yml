@@ -13,6 +13,6 @@ install:
 
 
 script:
-  - karma start --single-run --browsers SL_Chrome --reporters dot
+  - karma start --single-run --browsers SL_Chrome
 
 

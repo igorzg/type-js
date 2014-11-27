@@ -41,7 +41,7 @@ module.exports = function (config) {
                 version: "11"
             }
         },
-        reporters: ['saucelabs'],
+        reporters: ['dots', 'saucelabs'],
         browsers: [/*'Firefox',  'Opera', 'Safari', */ 'Chrome'],
         plugins: [
             'karma-*'

@@ -60,10 +60,11 @@
 
                 if (Type.isFunction(this._construct)) {
                     this._construct.apply(this, arguments);
+                    Object.keys(this).forEach(function it(key) {
+                        Type.defineProperty(this, key, this[key], Type.getType(this[key]));
+                    }.bind(this));
                 }
-                Object.keys(this).forEach(function it(key) {
-                    Type.defineProperty(this, key, this[key], Type.getType(this[key]));
-                }.bind(this));
+                
                 try {
                     Object.freeze(Class.prototype);
                     Object.preventExtensions(this);

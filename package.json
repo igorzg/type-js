@@ -1,13 +1,17 @@
 {
-    "name": "type-js",
+    "name": "typejs",
     "description": "Prototype inheritance and type system for js",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "repository": {
         "type": "git",
         "url": "git://github.com/igorzg/type-js.git"
     },
+    "bugs": {
+        "email": "igor.zg1987@gmail.com",
+        "url": "https://github.com/igorzg/type-js/issues"
+    },
     "keywords": [
-        "type-js",
+        "typejs",
         "prototype",
         "script"
     ],

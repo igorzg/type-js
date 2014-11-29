@@ -4,6 +4,8 @@ describe('Typejs', function () {
     var AdminUser, Group, User;
     beforeEach(function () {
         Group = Type.create({
+            _group: Type.STIRNG
+        }, {
             _construct: function (group) {
                 this._group = group;
             },
@@ -15,6 +17,9 @@ describe('Typejs', function () {
             }
         });
         AdminUser = Group.inherit({
+            username: Type.STIRNG,
+            date: Type.DATE
+        }, {
             _construct: function (username) {
 
                 this.username = username;
@@ -26,6 +31,9 @@ describe('Typejs', function () {
             }
         });
         User = AdminUser.inherit({
+            username: Type.STIRNG,
+            date: Type.DATE
+        }, {
             _construct: function (username) {
                 // define
 
@@ -283,16 +291,6 @@ describe('Typejs', function () {
     });
 
 
-    it('Prototype immutable after init', function () {
-        User.prototype.setPassword = function () {
-        };
-        var us = new User('igor'), message;
-        message = tryCatch(function () {
-            User.prototype.setPassword = function () {
-            };
-        });
-        expect(message).toBe("Cannot assign to read only property 'setPassword' of #<Type>");
-    });
 
     it('Root Should be immutable after is created', function () {
         var message = tryCatch(function () {
@@ -302,7 +300,9 @@ describe('Typejs', function () {
     });
 
     it('After object is initialized it should prevent extensions', function () {
-        var us = new User('igor'), message;
+        var us = new User('igor'),
+            us2 = new User('igor2'),
+            us3 = new User('igor2'),message;
         message = tryCatch(function () {
             us.o = 1;
         });
@@ -343,10 +343,6 @@ describe('Typejs', function () {
         });
         expect(message).toBe("Can't add property one, object is not extensible");
 
-        message = tryCatch(function () {
-            User.prototype.one = 1;
-        });
-        expect(message).toBe("Can't add property one, object is not extensible");
 
 
         message = tryCatch(function () {
@@ -370,40 +366,88 @@ describe('Typejs', function () {
         });
         expect(message).toBe("Can't add property one, object is not extensible");
 
-        message = tryCatch(function () {
-            User.prototype.one = 1;
-        });
-        expect(message).toBe("Can't add property one, object is not extensible");
     });
 
 
     it('Object should have own properties and do typecheck', function () {
-        var Test = Type.create({
-            _construct: function(one, two) {
-                this.date = new Date;
-                this.one = one;
-                this.two = two;
-            }
-        });
-        var t = new Test(1, 'two'), message;
+        var Test = Type.create(
+            {
+                date: Type.DATE,
+                one: Type.NUMBER,
+                two: Type.STIRNG
+            }, {
+                _construct: function (one, two) {
+                    this.date = new Date;
+                    this.one = one;
+                    this.two = two;
+                }
+            });
+        var t1 = new Test(1, 'two'),
+            t2 = new Test(6, 'sec'), message;
 
-        expect(t.hasOwnProperty("date")).toBe(true);
-        expect(t.hasOwnProperty("one")).toBe(true);
-        expect(t.hasOwnProperty("two")).toBe(true);
-        expect(Object.keys(t).length).toBe(3);
+        expect(t1.hasOwnProperty("date")).toBe(false);
+        expect(t1.hasOwnProperty("one")).toBe(false);
+        expect(t1.hasOwnProperty("two")).toBe(false);
+        expect(Object.keys(t1).length).toBe(1);
 
         message = tryCatch(function () {
-            t.one = "test";
+            t1.one = "test";
         });
         expect(message).toBe('"string" value: (test), is expected to be: "number" type.');
     });
 
+    it('should destroy and test properties', function () {
+       var User = Type.create({
+            username: Type.STIRNG,
+            date: Type.DATE
+        }, {
+            _construct: function (username) {
+                this.username = username;
+                this.date = new Date;
+            },
+            setPassword: function (value) {
+                this.password = value;
+            }
+        });
+        var us = new User('igor'),
+            us2 = new User('igor2'),
+            us3 = new User('igor3');
+        expect(us.username).toBe('igor');
+        expect(us2.username).toBe('igor2');
+        expect(us3.username).toBe('igor3');
+
+        us.destroy();
+        us2.destroy();
+        us3.destroy();
+
+        expect(us.__dynamic__).toBe(null);
+        expect(us2.__dynamic__).toBe(null);
+        expect(us3.__dynamic__).toBe(null);
+
+        var message = tryCatch(function () { us.setPassword('123')});
+
+        expect(message).toBe("Can't add property password, object is not extensible");
+    });
 
     xit('benchmark group', function () {
-        var start = new Date().getTime(), end, sec, count = 10000000;
+        var Test = Type.create({
+            _group: Type.STIRNG
+        }, {
+            _construct: function (group) {
+                this._group = group;
+            },
+            setGroup: function (value) {
+                this._group = value;
+            },
+            getGroup: function () {
+                return this._group;
+            }
+        });
+        var start = new Date().getTime(), end, sec, count = 1000000;
         var i = count;
         while (i > 0) {
-            new Group('admin');
+            new Test('admin');
+
             --i;
         }
         end = new Date().getTime();

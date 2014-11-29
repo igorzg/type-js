@@ -4,15 +4,16 @@ Type-js [![Build Status](https://travis-ci.org/igorzg/type-js.svg?branch=master)
 Static type support for javascript
 * Supported for ES5++ browsers.
 * Object roots are freezed after thy are created.
-* Object prototypes are freezed after thy are initialized.
 * Initialized objects are prevented from extension.
-* To define members to object you must provide _construct function to prototype
+* To define object you must provide two objects to Type.create(type_definition, prototype);
 * In IE 8,7,6 inheritance works but extensions and changes are allowed.
 ```js
-/// var Parent = Type.create([prototype]);
-/// var Child = Parent.inherit([prototype]);
+/// var Parent = Type.create([type definition], [prototype]);
+/// var Child = Parent.inherit([type definition], [prototype]);
 var AdminUser, Group, User;
 Group = Type.create({
+    _group: Type.STRING
+}, {
     _construct: function(group) {
         this._group = group;
     },
@@ -24,8 +25,10 @@ Group = Type.create({
     }
 });
 AdminUser = Group.inherit({
+    username: Type.STIRNG,
+    date: Type.DATE
+},{
     _construct: function(username) {
-
         this.username = username;
         this.date = new Date;
         this._super('admin'); /// this will override group because parent is group
@@ -35,9 +38,10 @@ AdminUser = Group.inherit({
     }
 });
 User = AdminUser.inherit({
+    username: Type.STIRNG,
+    date: Type.DATE
+},{
     _construct: function(username) {
-        // define
-
         this.username = username;
         this.date = new Date;
         this._super('test'); // this will override username to test because parent is AdminUser

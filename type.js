@@ -13,6 +13,9 @@
     "use strict";
     var initializing = false, prototype, superRegx = /\b_super\b/;
 
+    if (!Object.preventExtensions) {
+        Object.preventExtensions = Object.freeze = function() {}; // lte 8 to avoid try catch speed
+    }
     /**
      * @license Mit Licence 2014
      * @since 0.0.1
@@ -42,6 +45,7 @@
      * Define Type constructor
      */
     function Type() {}
+
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -50,11 +54,13 @@
      * @description
      * Create an Type
      */
-    Type.create = function (prop) {
+    Type.create = function (def, prop) {
         var _super = this.prototype, prototype;
 
         if (!Type.assert(Type.OBJECT, prop)) {
             throw new TypeError('prototype object: "' + Type.getType(prop) + '"  is expected to be: "' + Type.OBJECT + '" type.');
+        } else if (!Type.assert(Type.OBJECT, def)) {
+            throw new TypeError('prototype object: "' + Type.getType(def) + '"  is expected to be: "' + Type.OBJECT + '" type.');
         }
 
         initializing = true;
@@ -68,31 +74,36 @@
                 prototype[key] = prop[key];
             }
         });
+        // create definition
+        Object.keys(def).forEach(function (key) {
+            Type.defineProperty(def[key], prototype, key);
+        });
+        // add super
+        Type.defineProperty(Type.FUNCTION, prototype, "_super");
 
         function Class() {
-            if (!initializing) {
-                if (Type.isFunction(this._construct)) {
-                    this._construct.apply(this, arguments);
-                    Object.keys(this).forEach(Type.defineProperty.bind(this, this));
-                }
-                try {
-                    Object.freeze(Class.prototype);
-                    Object.preventExtensions(this);
-                } catch (e) {
-                    console.log('ES5 is not supported by your browser', e);
-                }
+            if (initializing) {
+                return this;
             }
+            this.__dynamic__ = {};
+            Object.preventExtensions(this); // prevent extensions
+
+            if (Type.isFunction(this._construct)) {
+                this._construct.apply(this, arguments);
+            }
+
         }
 
         Class.prototype = prototype;
         Class.prototype.constructor = Type;
+        Class.prototype.destroy = function () {
+            this.__dynamic__ = null;
+        };
+
+
         Class.inherit = Type.create;
 
-        try {
-            Object.freeze(Class);
-        } catch (e) {
-            console.log('ES5 is not supported by your browser', e);
-        }
+        Object.freeze(Class);
 
         return Class;
     };
@@ -104,12 +115,11 @@
      * @description
      * Define property
      */
-    Type.defineProperty = function (obj, key) {
-        var value = obj[key], type;
-        type = Type.isInitialized(value) ? Type.getType(value) : false;
+    Type.defineProperty = function (iType, obj, key) {
+        var type = iType;
         Object.defineProperty(obj, key, {
             set: function (nVal) {
-
+                //console.log(this);
                 // if initial value is undefined or null
                 if (!type && Type.isInitialized(nVal)) {
                     type = Type.getType(nVal);
@@ -117,10 +127,10 @@
                 } else if (Type.isInitialized(nVal) && !Type.assert(type, nVal)) {
                     throw new TypeError('"' + Type.getType(nVal) + '" value: (' + nVal + '), is expected to be: "' + type + '" type.');
                 }
-                value = nVal;
+                this.__dynamic__[key] = nVal;
             },
             get: function () {
-                return value;
+                return this.__dynamic__[key];
             }
         });
     };
@@ -300,11 +310,7 @@
         return !Type.isNull(value) && typeof value === 'object';
     };
 
-    try {
-        Object.freeze(Type);
-    } catch (e) {
-        console.log('ES5 is not supported by your browser', e);
-    }
+    Object.freeze(Type);
 
     return Type;
 }));

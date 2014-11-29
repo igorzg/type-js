@@ -11,7 +11,25 @@
     }
 }(this, function () {
     "use strict";
-    var initializing = false;
+    var initializing = false, prototype, superRegx = /\b_super\b/;
+
+    /**
+     * @license Mit Licence 2014
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @name handleSuper
+     * @description
+     * handle inheritance call
+     */
+    function handleSuper(name, fn, _super) {
+        return function () {
+            var tmp = this._super, ret;
+            this._super = _super[name];
+            ret = fn.apply(this, arguments);
+            this._super = tmp;
+            return ret;
+        };
+    }
 
     /**
      * @license Mit Licence 2014
@@ -35,21 +53,17 @@
     Type.create = function (prop) {
         var _super = this.prototype, prototype;
 
+        if (!Type.assert(Type.OBJECT, prop)) {
+            throw new TypeError('prototype object: "' + Type.getType(prop) + '"  is expected to be: "' + Type.OBJECT + '" type.');
+        }
+
         initializing = true;
-        prototype = new this();
+        prototype = new this;
         initializing = false;
 
         Object.keys(prop).forEach(function it(key) {
-            if (Type.isFunction(prop[key]) && Type.isFunction(_super[key]) && /\b_super\b/.test(prop[key])) {
-                prototype[key] = (function (name, fn) {
-                    return function () {
-                        var tmp = this._super, ret;
-                        this._super = _super[name];
-                        ret = fn.apply(this, arguments);
-                        this._super = tmp;
-                        return ret;
-                    };
-                })(key, prop[key]);
+            if (Type.isFunction(prop[key]) && Type.isFunction(_super[key]) && superRegx.test(prop[key])) {
+                prototype[key] = handleSuper(key, prop[key], _super);
             } else {
                 prototype[key] = prop[key];
             }
@@ -57,21 +71,16 @@
 
         function Class() {
             if (!initializing) {
-
                 if (Type.isFunction(this._construct)) {
                     this._construct.apply(this, arguments);
-                    Object.keys(this).forEach(function it(key) {
-                        Type.defineProperty(this, key, this[key], Type.getType(this[key]));
-                    }.bind(this));
+                    Object.keys(this).forEach(Type.defineProperty.bind(this, this));
                 }
-                
                 try {
                     Object.freeze(Class.prototype);
                     Object.preventExtensions(this);
                 } catch (e) {
                     console.log('ES5 is not supported by your browser', e);
                 }
-
             }
         }
 
@@ -95,22 +104,23 @@
      * @description
      * Define property
      */
-    Type.defineProperty = function (obj, key, value, type) {
-        var iVal = value, nType = type;
+    Type.defineProperty = function (obj, key) {
+        var value = obj[key], type;
+        type = Type.isInitialized(value) ? Type.getType(value) : false;
         Object.defineProperty(obj, key, {
             set: function (nVal) {
 
                 // if initial value is undefined or null
-                if (!nType && Type.isInitialized(nVal)) {
-                    nType = Type.getType(nVal);
+                if (!type && Type.isInitialized(nVal)) {
+                    type = Type.getType(nVal);
                     // assert type
-                } else if (Type.isInitialized(nVal) && !Type.assert(nType, nVal)) {
-                    throw new TypeError('"' + Type.getType(nVal) + '" value: (' + nVal + '), is expected to be: "' + nType + '" type.');
+                } else if (Type.isInitialized(nVal) && !Type.assert(type, nVal)) {
+                    throw new TypeError('"' + Type.getType(nVal) + '" value: (' + nVal + '), is expected to be: "' + type + '" type.');
                 }
-                iVal = nVal;
+                value = nVal;
             },
             get: function () {
-                return iVal;
+                return value;
             }
         });
     };

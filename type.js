@@ -14,7 +14,7 @@
     var initializing = false, prototype, superRegx = /\b_super\b/;
 
     if (!Object.preventExtensions) {
-        Object.preventExtensions = Object.freeze = function() {}; // lte 8 to avoid try catch speed
+        Object.preventExtensions = Object.freeze = function () {}; // lte 8 to avoid try catch speed
     }
     /**
      * @license Mit Licence 2014
@@ -125,7 +125,7 @@
                     type = Type.getType(nVal);
                     // assert type
                 } else if (Type.isInitialized(nVal) && !Type.assert(type, nVal)) {
-                    throw new TypeError('"' + Type.getType(nVal) + '" value: (' + nVal + '), is expected to be: "' + type + '" type.');
+                    throw new TypeError('TypeError key: ' + key + ', value: "' + Type.getType(nVal) + '"  (' + nVal + '), is expected to be: "' + type + '" type.');
                 }
                 this.__dynamic__[key] = nVal;
             },

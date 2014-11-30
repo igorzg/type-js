@@ -319,7 +319,7 @@ describe('Typejs', function () {
         message = tryCatch(function () {
             us.username = 1
         });
-        expect(message).toBe('"number" value: (1), is expected to be: "string" type.');
+        expect(message).toBe('TypeError key: username, value: "number" (1), is expected to be: "string" type.');
         message = tryCatch(function () {
             us.username = null
         });
@@ -328,15 +328,15 @@ describe('Typejs', function () {
             us.username = function () {
             }
         });
-        expect(message).toBe('"function" value: (function () { }), is expected to be: "string" type.');
+        expect(message).toBe('TypeError key: username, value: "function" (function () { }), is expected to be: "string" type.');
         message = tryCatch(function () {
             us.username = new RegExp;
         });
-        expect(message).toBe('"regexp" value: (/(?:)/), is expected to be: "string" type.');
+        expect(message).toBe('TypeError key: username, value: "regexp" (/(?:)/), is expected to be: "string" type.');
         message = tryCatch(function () {
             us.date = 1;
         });
-        expect(message).toBe('"number" value: (1), is expected to be: "date" type.');
+        expect(message).toBe('TypeError key: date, value: "number" (1), is expected to be: "date" type.');
 
         message = tryCatch(function () {
             us.one = 1;
@@ -393,7 +393,7 @@ describe('Typejs', function () {
         message = tryCatch(function () {
             t1.one = "test";
         });
-        expect(message).toBe('"string" value: (test), is expected to be: "number" type.');
+        expect(message).toBe('TypeError key: one, value: "string" (test), is expected to be: "number" type.');
     });
 
     it('should destroy and test properties', function () {

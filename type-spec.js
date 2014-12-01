@@ -319,7 +319,7 @@ describe('Typejs', function () {
         message = tryCatch(function () {
             us.username = 1
         });
-        expect(message).toBe('TypeError key: username, value: "number" (1), is expected to be: "string" type.');
+        expect(message).toBe('key: username, value: "number" (1), is expected to be: "string" type.');
         message = tryCatch(function () {
             us.username = null
         });
@@ -328,15 +328,15 @@ describe('Typejs', function () {
             us.username = function () {
             }
         });
-        expect(message).toBe('TypeError key: username, value: "function" (function () { }), is expected to be: "string" type.');
+        expect(message).toBe('key: username, value: "function" (function () { }), is expected to be: "string" type.');
         message = tryCatch(function () {
             us.username = new RegExp;
         });
-        expect(message).toBe('TypeError key: username, value: "regexp" (/(?:)/), is expected to be: "string" type.');
+        expect(message).toBe('key: username, value: "regexp" (/(?:)/), is expected to be: "string" type.');
         message = tryCatch(function () {
             us.date = 1;
         });
-        expect(message).toBe('TypeError key: date, value: "number" (1), is expected to be: "date" type.');
+        expect(message).toBe('key: date, value: "number" (1), is expected to be: "date" type.');
 
         message = tryCatch(function () {
             us.one = 1;
@@ -393,7 +393,7 @@ describe('Typejs', function () {
         message = tryCatch(function () {
             t1.one = "test";
         });
-        expect(message).toBe('TypeError key: one, value: "string" (test), is expected to be: "number" type.');
+        expect(message).toBe('key: one, value: "string" (test), is expected to be: "number" type.');
     });
 
     it('should destroy and test properties', function () {
@@ -427,6 +427,39 @@ describe('Typejs', function () {
         var message = tryCatch(function () { us.setPassword('123')});
 
         expect(message).toBe("Can't add property password, object is not extensible");
+    });
+
+
+    it('setter should al ways be correct type', function () {
+
+        var message = tryCatch(function () {
+            Type.create({
+                username: Type.STIRNG,
+                date: "invalid"
+            }, {
+                _construct: function (username) {
+                    this.username = username;
+                    this.date = new Date;
+                }
+            });
+        });
+
+        expect(message).toBe('Type must be valid type, provided is: invalid');
+
+
+        var message = tryCatch(function () {
+            Type.create({
+                username: Type.STIRNG,
+                date: "null"
+            }, {
+                _construct: function (username) {
+                    this.username = username;
+                    this.date = new Date;
+                }
+            });
+        });
+
+        expect(message).toBe('type cannot be:null');
     });
 
     xit('benchmark group', function () {

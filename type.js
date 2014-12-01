@@ -26,11 +26,8 @@
      */
     function handleSuper(name, fn, _super) {
         return function () {
-            var tmp = this._super, ret;
             this._super = _super[name];
-            ret = fn.apply(this, arguments);
-            this._super = tmp;
-            return ret;
+            return fn.apply(this, arguments);
         };
     }
 
@@ -115,17 +112,15 @@
      * @description
      * Define property
      */
-    Type.defineProperty = function (iType, obj, key) {
-        var type = iType;
+    Type.defineProperty = function (type, obj, key) {
+        if (!Type.isValidType(type)) {
+            throw new Error('Type must be valid type, provided is: ' + type);
+        }
+
         Object.defineProperty(obj, key, {
             set: function (nVal) {
-                //console.log(this);
-                // if initial value is undefined or null
-                if (!type && Type.isInitialized(nVal)) {
-                    type = Type.getType(nVal);
-                    // assert type
-                } else if (Type.isInitialized(nVal) && !Type.assert(type, nVal)) {
-                    throw new TypeError('TypeError key: ' + key + ', value: "' + Type.getType(nVal) + '"  (' + nVal + '), is expected to be: "' + type + '" type.');
+                if (Type.isInitialized(nVal) && !Type.assert(type, nVal)) {
+                    throw new TypeError('key: ' + key + ', value: "' + Type.getType(nVal) + '"  (' + nVal + '), is expected to be: "' + type + '" type.');
                 }
                 this.__dynamic__[key] = nVal;
             },
@@ -141,10 +136,41 @@
     Type.REGEX = "regexp";
     Type.NUMBER = "number";
     Type.BOOLEAN = "boolean";
-    Type.UNDEFINED = "undefined";
-    Type.NULL = "null";
     Type.FUNCTION = "function";
     Type.DATE = "date";
+    // init
+    Type.UNDEFINED = "undefined";
+    Type.NULL = "null";
+
+
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Type#assert
+     *
+     * @description
+     * Assert type
+     */
+    Type.isValidType = function isValidType(type) {
+        switch (type) {
+            case Type.OBJECT:
+            case Type.STIRNG:
+            case Type.ARRAY:
+            case Type.REGEX:
+            case Type.NUMBER:
+            case Type.BOOLEAN:
+            case Type.FUNCTION:
+            case Type.DATE:
+                return true;
+            break;
+            case Type.UNDEFINED:
+            case Type.NULL:
+                throw new Error('type cannot be:' + type);
+                break;
+
+        }
+        return false;
+    };
     /**
      * @since 0.0.1
      * @author Igor Ivanovic

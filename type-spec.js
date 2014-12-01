@@ -462,6 +462,199 @@ describe('Typejs', function () {
         expect(message).toBe('type cannot be:null');
     });
 
+
+
+    it('invoke should be invoked correctly', function () {
+        Group = Type.create({
+            _group: Type.STIRNG,
+            child: Type.OBJECT
+        }, {
+            _invoke: function (group) {
+                this.child = {current: group};
+                return this.child;
+            },
+            _construct: function (group) {
+                this._group = group;
+            },
+            setGroup: function (value) {
+                this._group = value;
+            },
+            getGroup: function () {
+                return this._group;
+            }
+        });
+        AdminUser = Group.inherit({
+            username: Type.STIRNG,
+            date: Type.DATE
+        }, {
+            _invoke: function (parent, username) {
+                this.child = {parent: parent, current: username};
+                try {
+                    this._super('SUPER IS NOT WORKING HERE');
+                } catch (e) {
+                    expect(e.message).toBe("undefined is not a function");
+                }
+                return this.child;
+            },
+            _construct: function (username) {
+                this.username = username;
+                this.date = new Date;
+            }
+        });
+        User = AdminUser.inherit({
+            username: Type.STIRNG,
+            date: Type.DATE
+        }, {
+            _invoke: function (parent, username) {
+                this.child = {parent: parent, current: username};
+                return this.child;
+            },
+            _construct: function (username) {
+                this.username = username;
+            }
+        });
+        var us = new User('igor');
+
+        expect(Type.isObject(us.child)).toBe(true);
+        expect(us.child.parent.parent.current).toBe('igor');
+        expect(us.child.parent.current).toBe('igor');
+        expect(us.child.current).toBe('igor');
+    });
+
+
+    it('invoke should be invoked correctly 2', function () {
+        Group = Type.create({
+            _group: Type.STIRNG,
+            child: Type.OBJECT
+        }, {
+            _invoke: function (group) {
+                this.child = {current: group};
+                return this.child;
+            },
+            _construct: function (group) {
+                this._group = group;
+            },
+            setGroup: function (value) {
+                this._group = value;
+            },
+            getGroup: function () {
+                return this._group;
+            }
+        });
+        AdminUser = Group.inherit({
+            username: Type.STIRNG,
+            date: Type.DATE
+        }, {
+            _construct: function (username) {
+                this.username = username;
+                this.date = new Date;
+            }
+        });
+        User = AdminUser.inherit({
+            username: Type.STIRNG,
+            date: Type.DATE
+        }, {
+            _invoke: function (parent, username) {
+                this.child = {parent: parent, current: username};
+                return this.child;
+            },
+            _construct: function (username) {
+                this.username = username;
+            }
+        });
+        var us = new User('igor');
+        expect(Type.isObject(us.child)).toBe(true);
+
+        expect(us.child.parent.current.current).toBe('igor');
+        expect(us.child.current).toBe('igor');
+    });
+
+
+
+    it('invoke should be invoked correctly 3', function () {
+        Group = Type.create({
+            _group: Type.STIRNG,
+            child: Type.OBJECT
+        }, {
+            _invoke: function (group) {
+                this.child = {current: group};
+                return this.child;
+            },
+            _construct: function (group) {
+                this._group = group;
+            },
+            setGroup: function (value) {
+                this._group = value;
+            },
+            getGroup: function () {
+                return this._group;
+            }
+        });
+        AdminUser = Group.inherit({
+            username: Type.STIRNG,
+            date: Type.DATE
+        }, {
+            _construct: function (username) {
+                this.username = username;
+                this.date = new Date;
+            }
+        });
+        User = AdminUser.inherit({
+            username: Type.STIRNG,
+            date: Type.DATE
+        }, {
+            _construct: function (username) {
+                this.username = username;
+            }
+        });
+        var us = new User('igor');
+        expect(Type.isObject(us.child)).toBe(true);
+        expect(us.child.current.current.current.current).toBe('igor');
+
+    });
+
+
+    it('invoke should be invoked correctly 4', function () {
+        Group = Type.create({
+            _group: Type.STIRNG,
+            child: Type.OBJECT
+        }, {
+            _invoke: function (group) {
+                this.child = {current: group};
+            },
+            _construct: function (group) {
+                this._group = group;
+            },
+            setGroup: function (value) {
+                this._group = value;
+            },
+            getGroup: function () {
+                return this._group;
+            }
+        });
+        AdminUser = Group.inherit({
+            username: Type.STIRNG,
+            date: Type.DATE
+        }, {
+            _construct: function (username) {
+                this.username = username;
+                this.date = new Date;
+            }
+        });
+        User = AdminUser.inherit({
+            username: Type.STIRNG,
+            date: Type.DATE
+        }, {
+            _construct: function (username) {
+                this.username = username;
+            }
+        });
+        var us = new User('igor');
+        expect(Type.isObject(us.child)).toBe(true);
+        expect(us.child.current).toBe('igor');
+
+    });
+
     xit('benchmark group', function () {
         var Test = Type.create({
             _group: Type.STIRNG

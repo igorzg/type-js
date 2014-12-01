@@ -6,14 +6,24 @@ Static type support for javascript
 * Object roots are freezed after thy are created.
 * Initialized objects are prevented from extension.
 * To define object you must provide two objects to Type.create(type_definition, prototype);
+* _construct function is executed when object is constructed to inherit use _super(arguments) inside of _construct
+* _invoke is executed before _construct cross inherited objects on each object construction
+* _super() use _super(arguments) call to call inherited method.
+* _super is not allowed to be executed inside _invoke call
 * In IE 8,7,6 inheritance works but extensions and changes are allowed.
 ```js
 /// var Parent = Type.create([type definition], [prototype]);
 /// var Child = Parent.inherit([type definition], [prototype]);
+
+
 var AdminUser, Group, User;
 Group = Type.create({
-    _group: Type.STRING
+    _group: Type.STRING,
+    invoked: Type.STRING
 }, {
+    _invoke: function(group) {
+        this.invoked = group;
+    },
     _construct: function(group) {
         this._group = group;
     },

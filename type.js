@@ -11,7 +11,7 @@
     }
 }(this, function () {
     "use strict";
-    var initializing = false, prototype, superRegx = /\b_super\b/;
+    var initializing = false, superRegx = /\b_super\b/;
 
     if (!Object.preventExtensions) {
         Object.preventExtensions = Object.freeze = function () {}; // lte 8 to avoid try catch speed
@@ -24,13 +24,30 @@
      * @description
      * handle inheritance call
      */
-    function handleSuper(name, fn, _super) {
-        return function () {
+    function _handleSuper(name, fn, _super) {
+        return function _superCall() {
             this._super = _super[name];
             return fn.apply(this, arguments);
         };
     }
-
+    /**
+     * @license Mit Licence 2014
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @name _handleConstruct
+     * @description
+     * Handle construct
+     */
+    function _handleInvoke(invoke, inherited) {
+        return function _invokeCall() {
+            var args = Array.prototype.slice.call(arguments), data;
+            data = inherited.apply(this, args);
+            if (!!data) {
+                args.unshift(data);
+            }
+            return invoke.apply(this, args);
+        }
+    }
     /**
      * @license Mit Licence 2014
      * @since 0.0.1
@@ -52,7 +69,7 @@
      * Create an Type
      */
     Type.create = function (def, prop) {
-        var _super = this.prototype, prototype;
+        var _super = this.prototype, prototype, _inv = "_invoke";
 
         if (!Type.assert(Type.OBJECT, prop)) {
             throw new TypeError('prototype object: "' + Type.getType(prop) + '"  is expected to be: "' + Type.OBJECT + '" type.');
@@ -65,30 +82,40 @@
         initializing = false;
 
         Object.keys(prop).forEach(function it(key) {
-            if (Type.isFunction(prop[key]) && Type.isFunction(_super[key]) && superRegx.test(prop[key])) {
-                prototype[key] = handleSuper(key, prop[key], _super);
+            if (key !== _inv && Type.isFunction(prop[key]) && Type.isFunction(_super[key]) && superRegx.test(prop[key])) {
+                prototype[key] = _handleSuper(key, prop[key], _super);
             } else {
                 prototype[key] = prop[key];
             }
         });
+
+        if (Type.isFunction(_super[_inv]) && Type.isFunction(prototype[_inv])) {
+            prototype[_inv] = _handleInvoke(prototype[_inv], _super[_inv]);
+        } else if (Type.isFunction(_super[_inv])) {
+            prototype[_inv] = _super[_inv];
+        }
         // create definition
         Object.keys(def).forEach(function (key) {
             Type.defineProperty(def[key], prototype, key);
         });
         // add super
         Type.defineProperty(Type.FUNCTION, prototype, "_super");
-
+        /**
+         * @returns {Type.Class}
+         * @constructor
+         */
         function Class() {
             if (initializing) {
                 return this;
             }
             this.__dynamic__ = {};
             Object.preventExtensions(this); // prevent extensions
-
+            if (Type.isFunction(this._invoke)) {
+                this._invoke.apply(this, arguments);
+            }
             if (Type.isFunction(this._construct)) {
                 this._construct.apply(this, arguments);
             }
-
         }
 
         Class.prototype = prototype;

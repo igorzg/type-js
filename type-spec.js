@@ -4,9 +4,9 @@ describe('Typejs', function () {
     var AdminUser, Group, User;
     beforeEach(function () {
         Group = Type.create({
-            _group: Type.STIRNG
+            _group: Type.STRING
         }, {
-            _construct: function (group) {
+            _construct: function Group_construct(group) {
                 this._group = group;
             },
             setGroup: function (value) {
@@ -17,10 +17,10 @@ describe('Typejs', function () {
             }
         });
         AdminUser = Group.inherit({
-            username: Type.STIRNG,
+            username: Type.STRING,
             date: Type.DATE
         }, {
-            _construct: function (username) {
+            _construct: function AdminUser_construct(username) {
 
                 this.username = username;
                 this.date = new Date;
@@ -31,10 +31,10 @@ describe('Typejs', function () {
             }
         });
         User = AdminUser.inherit({
-            username: Type.STIRNG,
+            username: Type.STRING,
             date: Type.DATE
         }, {
-            _construct: function (username) {
+            _construct: function User_construct(username) {
                 // define
 
                 this.username = username;
@@ -267,7 +267,7 @@ describe('Typejs', function () {
         expect(Type.assert(Type.UNDEFINED, undefined)).toBe(true);
         expect(Type.assert(Type.DATE, new Date)).toBe(true);
         expect(Type.assert(Type.REGEX, new RegExp)).toBe(true);
-        expect(Type.assert(Type.STIRNG, "")).toBe(true);
+        expect(Type.assert(Type.STRING, "")).toBe(true);
         expect(Type.assert(Type.NUMBER, 1)).toBe(true);
         expect(Type.assert(Type.NUMBER, 0)).toBe(true);
         expect(Type.assert(Type.NUMBER, NaN)).toBe(true);
@@ -374,7 +374,7 @@ describe('Typejs', function () {
             {
                 date: Type.DATE,
                 one: Type.NUMBER,
-                two: Type.STIRNG
+                two: Type.STRING
             }, {
                 _construct: function (one, two) {
                     this.date = new Date;
@@ -398,7 +398,7 @@ describe('Typejs', function () {
 
     it('should destroy and test properties', function () {
        var User = Type.create({
-            username: Type.STIRNG,
+            username: Type.STRING,
             date: Type.DATE
         }, {
             _construct: function (username) {
@@ -434,7 +434,7 @@ describe('Typejs', function () {
 
         var message = tryCatch(function () {
             Type.create({
-                username: Type.STIRNG,
+                username: Type.STRING,
                 date: "invalid"
             }, {
                 _construct: function (username) {
@@ -449,7 +449,7 @@ describe('Typejs', function () {
 
         var message = tryCatch(function () {
             Type.create({
-                username: Type.STIRNG,
+                username: Type.STRING,
                 date: "null"
             }, {
                 _construct: function (username) {
@@ -466,7 +466,7 @@ describe('Typejs', function () {
 
     it('invoke should be invoked correctly', function () {
         Group = Type.create({
-            _group: Type.STIRNG,
+            _group: Type.STRING,
             child: Type.OBJECT
         }, {
             _invoke: function (group) {
@@ -484,7 +484,7 @@ describe('Typejs', function () {
             }
         });
         AdminUser = Group.inherit({
-            username: Type.STIRNG,
+            username: Type.STRING,
             date: Type.DATE
         }, {
             _invoke: function (parent, username) {
@@ -502,7 +502,7 @@ describe('Typejs', function () {
             }
         });
         User = AdminUser.inherit({
-            username: Type.STIRNG,
+            username: Type.STRING,
             date: Type.DATE
         }, {
             _invoke: function (parent, username) {
@@ -524,7 +524,7 @@ describe('Typejs', function () {
 
     it('invoke should be invoked correctly 2', function () {
         Group = Type.create({
-            _group: Type.STIRNG,
+            _group: Type.STRING,
             child: Type.OBJECT
         }, {
             _invoke: function (group) {
@@ -542,7 +542,7 @@ describe('Typejs', function () {
             }
         });
         AdminUser = Group.inherit({
-            username: Type.STIRNG,
+            username: Type.STRING,
             date: Type.DATE
         }, {
             _construct: function (username) {
@@ -551,7 +551,7 @@ describe('Typejs', function () {
             }
         });
         User = AdminUser.inherit({
-            username: Type.STIRNG,
+            username: Type.STRING,
             date: Type.DATE
         }, {
             _invoke: function (parent, username) {
@@ -573,7 +573,7 @@ describe('Typejs', function () {
 
     it('invoke should be invoked correctly 3', function () {
         Group = Type.create({
-            _group: Type.STIRNG,
+            _group: Type.STRING,
             child: Type.OBJECT
         }, {
             _invoke: function (group) {
@@ -591,7 +591,7 @@ describe('Typejs', function () {
             }
         });
         AdminUser = Group.inherit({
-            username: Type.STIRNG,
+            username: Type.STRING,
             date: Type.DATE
         }, {
             _construct: function (username) {
@@ -600,7 +600,7 @@ describe('Typejs', function () {
             }
         });
         User = AdminUser.inherit({
-            username: Type.STIRNG,
+            username: Type.STRING,
             date: Type.DATE
         }, {
             _construct: function (username) {
@@ -616,7 +616,7 @@ describe('Typejs', function () {
 
     it('invoke should be invoked correctly 4', function () {
         Group = Type.create({
-            _group: Type.STIRNG,
+            _group: Type.STRING,
             child: Type.OBJECT
         }, {
             _invoke: function (group) {
@@ -633,7 +633,7 @@ describe('Typejs', function () {
             }
         });
         AdminUser = Group.inherit({
-            username: Type.STIRNG,
+            username: Type.STRING,
             date: Type.DATE
         }, {
             _construct: function (username) {
@@ -642,7 +642,7 @@ describe('Typejs', function () {
             }
         });
         User = AdminUser.inherit({
-            username: Type.STIRNG,
+            username: Type.STRING,
             date: Type.DATE
         }, {
             _construct: function (username) {
@@ -655,9 +655,21 @@ describe('Typejs', function () {
 
     });
 
+
+
+    it('it shoud be al ways constructed!', function () {
+
+
+        var message = tryCatch(function() {
+            User('igor');
+        });
+
+        expect(message).toBe("Object must be constructed");
+    });
+
     xit('benchmark group', function () {
         var Test = Type.create({
-            _group: Type.STIRNG
+            _group: Type.STRING
         }, {
             _construct: function (group) {
                 this._group = group;

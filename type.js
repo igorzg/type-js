@@ -101,12 +101,15 @@
         // add super
         Type.defineProperty(Type.FUNCTION, prototype, "_super");
         /**
-         * @returns {Type.Class}
+         * @returns {Type._Constructor}
          * @constructor
          */
-        function Class() {
+        function _Constructor() {
             if (initializing) {
                 return this;
+            }
+            if (!(this instanceof Type)) {
+                throw new TypeError('Object must be constructed');
             }
             this.__dynamic__ = {};
             Object.preventExtensions(this); // prevent extensions
@@ -118,18 +121,18 @@
             }
         }
 
-        Class.prototype = prototype;
-        Class.prototype.constructor = Type;
-        Class.prototype.destroy = function () {
+        _Constructor.prototype = prototype;
+        _Constructor.prototype.constructor = Type;
+        _Constructor.prototype.destroy = function _Constructor_destroy() {
             this.__dynamic__ = null;
         };
 
 
-        Class.inherit = Type.create;
+        _Constructor.inherit = Type.create;
 
-        Object.freeze(Class);
+        Object.freeze(_Constructor);
 
-        return Class;
+        return _Constructor;
     };
     /**
      * @since 0.0.1
@@ -158,7 +161,7 @@
     };
 
     Type.OBJECT = "object";
-    Type.STIRNG = "string";
+    Type.STRING = "string";
     Type.ARRAY = "array";
     Type.REGEX = "regexp";
     Type.NUMBER = "number";
@@ -181,7 +184,7 @@
     Type.isValidType = function isValidType(type) {
         switch (type) {
             case Type.OBJECT:
-            case Type.STIRNG:
+            case Type.STRING:
             case Type.ARRAY:
             case Type.REGEX:
             case Type.NUMBER:
@@ -234,7 +237,7 @@
         } else if (Type.isUndefined(value)) {
             return Type.UNDEFINED;
         } else if (Type.isString(value)) {
-            return Type.STIRNG;
+            return Type.STRING;
         } else if (Type.isNumber(value)) {
             return Type.NUMBER;
         } else if (Type.isArray(value)) {

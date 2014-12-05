@@ -1,7 +1,8 @@
 Type-js [![Build Status](https://travis-ci.org/igorzg/type-js.svg?branch=master)](https://travis-ci.org/igorzg/type-js)
 ========
 
-Static type support for javascript
+Type checking support for javascript
+* All types are checked at runtime
 * Supported for ES5++ browsers.
 * Object roots are freezed after thy are created.
 * Initialized objects are prevented from extension.

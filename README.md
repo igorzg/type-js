@@ -12,7 +12,9 @@ Type checking support for javascript
 * _super() use _super(arguments) call to call inherited method.
 * _super is not allowed to be executed inside _invoke call
 * In IE 8,7,6 inheritance works but extensions and changes are allowed.
-```js
+
+
+```javascript
 /// var Parent = Type.create([type definition], [prototype]);
 /// var Child = Parent.inherit([type definition], [prototype]);
 

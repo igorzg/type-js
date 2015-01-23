@@ -2,7 +2,7 @@
     "name": "static-type-js",
     "main" : "./type.js",
     "description": "Prototype inheritance and type system for js",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "repository": {
         "type": "git",
         "url": "git://github.com/igorzg/type-js.git"

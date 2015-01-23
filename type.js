@@ -26,8 +26,11 @@
      */
     function _handleSuper(name, fn, _super) {
         return function _superCall() {
+            var temp = this._super, func;
             this._super = _super[name];
-            return fn.apply(this, arguments);
+            func = fn.apply(this, arguments);
+            this._super = temp;
+            return func;
         };
     }
     /**

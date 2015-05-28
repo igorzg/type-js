@@ -14,7 +14,8 @@ Type checking support for javascript
 * In IE 8,7,6 inheritance works but extensions and changes are allowed.
 
 
-```javascript
+```
+javascript
 /// var Parent = Type.create([type definition], [prototype]);
 /// var Child = Parent.inherit([type definition], [prototype]);
 
@@ -24,19 +25,12 @@ Group = Type.create({
     _group: Type.STRING,
     invoked: Type.STRING
 }, {
-    _invoke: function(group) {
-        this.invoked = group;
-    },
-    _construct: function(group) {
-        this._group = group;
-    },
-    setGroup: function(value) {
-        this._group = value;
-    },
-    getGroup: function() {
-        return this._group;
-    }
+    _invoke:    function(group) { this.invoked = group; },
+    _construct: function(group) { this._group = group; },
+    setGroup:   function(value) { this._group = value; },
+    getGroup:   function()      { return this._group; }
 });
+
 AdminUser = Group.inherit({
     username: Type.STIRNG,
     date: Type.DATE
@@ -46,10 +40,9 @@ AdminUser = Group.inherit({
         this.date = new Date;
         this._super('admin'); /// this will override group because parent is group
     },
-    setUser: function(value) {
-        this.username = value;
-    }
+    setUser: function(value) { this.username = value; }
 });
+
 User = AdminUser.inherit({
     username: Type.STIRNG,
     date: Type.DATE
@@ -77,4 +70,26 @@ user.date = new Date; // re assigning initial value is allowed
 User.prototype.one = 1; // Will throw type error because adding something to prototype after initialization is not allowed
 User.one = 1; // Extending roots is not allowed
 
+```
+
+### Available type checks as class methods
+
+```
+Type.isBoolean(value)
+Type.isUndefined(value)
+Type.isString(value)
+Type.isNumber(value)
+Type.isArray(value)
+Type.isNull(value)
+Type.isFunction(value)
+Type.isDate(value)
+Type.isRegExp(value)
+Type.isObject(value)
+```
+
+### Special methods
+
+```
+_construct // initialize after object create
+_super     // call parent overloaded method
 ```

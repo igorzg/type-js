@@ -72,7 +72,7 @@ User.one = 1; // Extending roots is not allowed
 
 ```
 
-### Available type checks as class methods
+### Available type checks
 
 ```
 Type.isBoolean(value)
